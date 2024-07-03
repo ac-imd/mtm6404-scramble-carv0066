@@ -72,13 +72,14 @@ function MyStrikes({ strikes }) {
       <div className="points-content">
         <h3>{strikes}</h3>
         <p>STRIKES</p>
+        {strikes >= 3 && <p className="game-over-message">Game Over!</p>}
       </div>
     </div>
   );
 }
 
 //Creating an input component
-function MyWordInput({ onGuess }) {
+function MyWordInput({ onGuess, passesRemaining, gameOver }) {
   const [inputValue, setInputValue] = React.useState('');
 
   const handleChange = (event) => {
@@ -98,8 +99,9 @@ function MyWordInput({ onGuess }) {
         className="form"
         value={inputValue}
         onChange={handleChange}
+        disabled={passesRemaining === 0 || gameOver}
       />
-      <button type="submit">Submit</button>
+      <button type="submit" className="button" disabled={passesRemaining === 0 || gameOver}>Submit</button>
     </form>
   );
 }
@@ -107,7 +109,7 @@ function MyWordInput({ onGuess }) {
 // Passes Remaining Component
 function MyPassesRemaining({ passesRemaining }) {
   return (
-    <div>
+    <div className="passes-remaining">
       <p>{passesRemaining} Passes Remaining</p>
     </div>
   );
@@ -148,6 +150,15 @@ const App = () => {
         scrambleNewWord();
       } else {
         setStrikes(strikes + 1);
+        if (strikes + 1 >= 3) {
+          setGameOver(true);
+      }
+      //Decrease number of passes every strike
+      setPassesRemaining(passesRemaining - 1);
+      if (passesRemaining === 1) {
+        //Makes sure i can't play anymore after I'm out of passes
+        setGameOver(true);
+      }
       }
     };
 
@@ -182,7 +193,7 @@ const App = () => {
       </div>
       <div className="input-section">
         <p className="scrambled-word">{scrambledWord}</p>
-        <MyWordInput onGuess={handleGuessInput} />
+        <MyWordInput onGuess={handleGuessInput} passesRemaining={passesRemaining} gameOver={gameOver} />
         <MyPassesRemaining passesRemaining={passesRemaining} />
       </div>
     </div>
